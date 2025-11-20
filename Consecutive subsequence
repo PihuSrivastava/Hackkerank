@@ -1,0 +1,36 @@
+#include <stdio.h>
+
+long long freq[1000001]; // safe large array
+
+int main() {
+    int T;
+    scanf("%d", &T);
+
+    while (T--) {
+        int n, k;
+        scanf("%d %d", &n, &k);
+
+        long long ans = 0;
+        long long prefix = 0;
+
+        // initialize frequencies of remainders
+        long long count[101] = {0};
+        count[0] = 1; // prefix sum = 0 contributes
+
+        for (int i = 0; i < n; i++) {
+            int x;
+            scanf("%d", &x);
+
+            prefix = (prefix + x) % k;
+            if (prefix < 0) prefix += k;
+
+            ans += count[prefix]; // add previous occurrences
+
+            count[prefix]++;  // record this remainder
+        }
+
+        printf("%lld\n", ans);
+    }
+
+    return 0;
+}
