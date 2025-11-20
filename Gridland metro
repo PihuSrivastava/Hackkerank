@@ -1,0 +1,152 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+string ltrim(const string &);
+string rtrim(const string &);
+vector<string> split(const string &);
+
+/*
+ * Complete the 'gridlandMetro' function below.
+ *
+ * The function is expected to return an INTEGER.
+ * The function accepts following parameters:
+ *  1. INTEGER n
+ *  2. INTEGER m
+ *  3. INTEGER k
+ *  4. 2D_INTEGER_ARRAY track
+ */
+vector<vector<long long>> merge(vector<vector<long long>> tracks) {
+    sort(tracks.begin(), tracks.end(), [](vector<long long>& a, vector<long long>& b) {
+        return a[0] < b[0];
+    });
+
+    if (tracks.empty()) {
+        return {};
+    }
+
+    vector<vector<long long>> merged_tracks;
+    merged_tracks.push_back(tracks[0]);
+
+    for (int i = 1; i < tracks.size(); i++) {
+        long long last_end = merged_tracks.back()[1];
+        long long current_start = tracks[i][0];
+        long long current_end = tracks[i][1];
+
+        if (current_start <= last_end + 1) { 
+            merged_tracks.back()[1] = max(last_end, current_end);
+        } else {
+            merged_tracks.push_back(tracks[i]);
+        }
+    }
+    return merged_tracks;
+}
+
+long long gridlandMetro(long long n, long long m, int k, vector<vector<int>> track) {
+
+    long long totalsquares = n * m; 
+    
+    unordered_map<int, vector<vector<long long>>> mp; 
+
+    for (const auto& i : track) {
+        mp[i[0]].push_back({(long long)i[1], (long long)i[2]}); 
+    }
+
+    for (const auto& pair : mp) {
+        const int row_index = pair.first;
+        const vector<vector<long long>>& tracks_in_row = pair.second;
+        
+        vector<vector<long long>> merged_segments = merge(tracks_in_row);
+        
+        long long covered_cells_in_row = 0;
+        
+        for (const auto& segment : merged_segments) {
+            covered_cells_in_row += segment[1] - segment[0] + 1; 
+        }
+        
+        totalsquares -= covered_cells_in_row;
+    }
+    
+    return totalsquares;
+}
+
+int main()
+{
+    ofstream fout(getenv("OUTPUT_PATH"));
+
+    string first_multiple_input_temp;
+    getline(cin, first_multiple_input_temp);
+
+    vector<string> first_multiple_input = split(rtrim(first_multiple_input_temp));
+
+    int n = stoi(first_multiple_input[0]);
+
+    int m = stoi(first_multiple_input[1]);
+
+    int k = stoi(first_multiple_input[2]);
+
+    vector<vector<int>> track(k);
+
+    for (int i = 0; i < k; i++) {
+        track[i].resize(3);
+
+        string track_row_temp_temp;
+        getline(cin, track_row_temp_temp);
+
+        vector<string> track_row_temp = split(rtrim(track_row_temp_temp));
+
+        for (int j = 0; j < 3; j++) {
+            int track_row_item = stoi(track_row_temp[j]);
+
+            track[i][j] = track_row_item;
+        }
+    }
+
+    long long result = gridlandMetro(n, m, k, track);
+
+    fout << result << "\n";
+
+    fout.close();
+
+    return 0;
+}
+
+string ltrim(const string &str) {
+    string s(str);
+
+    s.erase(
+        s.begin(),
+        find_if(s.begin(), s.end(), not1(ptr_fun<int, int>(isspace)))
+    );
+
+    return s;
+}
+
+string rtrim(const string &str) {
+    string s(str);
+
+    s.erase(
+        find_if(s.rbegin(), s.rend(), not1(ptr_fun<int, int>(isspace))).base(),
+        s.end()
+    );
+
+    return s;
+}
+
+vector<string> split(const string &str) {
+    vector<string> tokens;
+
+    string::size_type start = 0;
+    string::size_type end = 0;
+
+    while ((end = str.find(" ", start)) != string::npos) {
+        tokens.push_back(str.substr(start, end - start));
+
+        start = end + 1;
+    }
+
+    tokens.push_back(str.substr(start));
+        
+
+    return tokens;
+}
